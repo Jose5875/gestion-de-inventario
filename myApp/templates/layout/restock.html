@@ -1,0 +1,73 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="product-title">Reabastecer Inventario</h1>
+        <a href="{% url 'inventory' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Inventario
+        </a>
+    </div>
+
+    <div class="product-card p-4">
+        <div class="mb-4">
+            <h3 class="text-info mb-3">{{ inventory.product.name }}</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card bg-dark">
+                        <div class="card-body">
+                            <h5 class="card-title">Stock Actual</h5>
+                            <p class="card-text display-6">{{ inventory.current_quantity }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-dark">
+                        <div class="card-body">
+                            <h5 class="card-title">Estado</h5>
+                            <p class="card-text">
+                                {% if inventory.current_quantity < 10 %}
+                                <span class="badge bg-danger">Stock Bajo</span>
+                                {% elif inventory.current_quantity < 20 %}
+                                <span class="badge bg-warning">Stock Medio</span>
+                                {% else %}
+                                <span class="badge bg-success">Stock Bueno</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" class="mt-4">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.quantity.id_for_label }}" class="form-label">Cantidad a Agregar</label>
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                    <div class="text-danger">
+                        {{ form.quantity.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.reason.id_for_label }}" class="form-label">Razón del Reabastecimiento</label>
+                    {{ form.reason }}
+                    {% if form.reason.errors %}
+                    <div class="text-danger">
+                        {{ form.reason.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="text-end mt-4">
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Confirmar Reabastecimiento
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

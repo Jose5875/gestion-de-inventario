@@ -1,0 +1,92 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="product-title">Historial de Inventario</h1>
+        <a href="{% url 'inventory' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver al Inventario
+        </a>
+    </div>
+
+    <div class="product-card p-4">
+        <div class="mb-4">
+            <h3 class="text-info mb-3">{{ inventory.product.name }}</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-dark">
+                        <div class="card-body">
+                            <h5 class="card-title">Stock Actual</h5>
+                            <p class="card-text display-6">{{ inventory.current_quantity }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-dark">
+                        <div class="card-body">
+                            <h5 class="card-title">Última Actualización</h5>
+                            <p class="card-text">{{ inventory.last_update|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-dark">
+                        <div class="card-body">
+                            <h5 class="card-title">Estado</h5>
+                            <p class="card-text">
+                                {% if inventory.current_quantity < 10 %}
+                                <span class="badge bg-danger">Stock Bajo</span>
+                                {% elif inventory.current_quantity < 20 %}
+                                <span class="badge bg-warning">Stock Medio</span>
+                                {% else %}
+                                <span class="badge bg-success">Stock Bueno</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="mb-3">Registro de Cambios</h4>
+        {% if history %}
+        <div class="responsive-table">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Cantidad Anterior</th>
+                        <th>Nueva Cantidad</th>
+                        <th>Diferencia</th>
+                        <th>Razón</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in history %}
+                    <tr>
+                        <td>{{ entry.date|date:"d/m/Y H:i" }}</td>
+                        <td>{{ entry.old_quantity }}</td>
+                        <td>{{ entry.new_quantity }}</td>
+                        <td>
+                            {% with diff=entry.new_quantity|add:"-"|add:entry.old_quantity %}
+                            {% if diff > 0 %}
+                            <span class="text-success">+{{ diff }}</span>
+                            {% else %}
+                            <span class="text-danger">{{ diff }}</span>
+                            {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td>{{ entry.reason }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No hay registros de cambios en el inventario.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

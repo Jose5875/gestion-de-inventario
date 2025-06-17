@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Sistema de Gestión</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'base.css' %}">
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=SGPE" alt="Logo" width="40">
+        </div>
+        <a href="{% url 'dashBoard' %}" class="nav-link{% if request.resolver_match.url_name == 'dashBoard' %} active{% endif %}"><i class="bi bi-grid"></i> Dashboard</a>
+        <a href="{% url 'product' %}" class="nav-link{% if request.resolver_match.url_name == 'product' %} active{% endif %}"><i class="bi bi-box-seam"></i> Productos</a>
+        <a href="{% url 'category' %}" class="nav-link{% if request.resolver_match.url_name == 'category' %} active{% endif %}"><i class="bi bi-tags"></i> Categorías</a>
+        <a href="{% url 'sale' %}" class="nav-link{% if request.resolver_match.url_name == 'sale' %} active{% endif %}"><i class="bi bi-cart"></i> Ventas</a>
+        <a href="{% url 'inventory' %}" class="nav-link{% if request.resolver_match.url_name == 'inventory' %} active{% endif %}"><i class="bi bi-clipboard-data"></i> Inventario</a>
+        <a href="{% url 'customer' %}" class="nav-link{% if request.resolver_match.url_name == 'customer' %} active{% endif %}"><i class="bi bi-people"></i> Clientes</a>
+        <a href="{% url 'employee' %}" class="nav-link{% if request.resolver_match.url_name == 'employee' %} active{% endif %}"><i class="bi bi-person-badge"></i> Empleados</a>
+        <a href="{% url 'supplier' %}" class="nav-link{% if request.resolver_match.url_name == 'supplier' %} active{% endif %}"><i class="bi bi-building"></i> Proveedores</a>
+        <a href="{% url 'expenses' %}" class="nav-link{% if request.resolver_match.url_name == 'expenses' %} active{% endif %}"><i class="bi bi-cash-coin"></i> Gastos</a>
+        <a href="{% url 'reports' %}" class="nav-link mt-auto{% if request.resolver_match.url_name == 'reports' %} active{% endif %}"><i class="bi bi-bar-chart"></i> Reportes</a>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <div class="d-flex align-items-center gap-3" style="margin-left: 10px; text-align: center;">
+                <span class="app-title fw-bold" style="font-size:1.4rem;color:#f8f3fa;letter-spacing:0.03em; text-align: center;">SGPE | Sistema de Gestión de Empresas</span>
+            </div>
+            <div class="profile-dropdown">
+                <div class="profile-icon">
+                    <i class="bi bi-person-circle fs-4"></i>
+                </div>
+                <div class="profile-dropdown-content">
+                    <div class="p-3 text-center border-bottom">
+                        <i class="bi bi-person-circle fs-1 text-primary"></i>
+                        <h6 class="mt-2 mb-0">{{ user.username }}</h6>
+                        <small class="profile-secondary">{{ user.email }}</small>
+                    </div>
+                    <a href="{% url 'profile' %}"><i class="bi bi-person me-2"></i> Mi Perfil</a>
+                    <a href="{% url 'update_profile' %}"><i class="bi bi-pencil me-2"></i> Actualizar Datos</a>
+                    <div class="divider"></div>
+                    <a href="{% url 'logout' %}" class="text-danger"><i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+        {% if messages %}
+        <div class="messages p-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
+

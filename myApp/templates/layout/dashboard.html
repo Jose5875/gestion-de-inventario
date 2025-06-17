@@ -1,0 +1,92 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+
+<div class="dashboard-container">
+    <div class="row">
+        <!-- Productos -->
+        <div class="col-md-4 col-lg-3">
+            <div class="dashboard-card">
+                <div class="card-icon text-primary">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <h3>Productos</h3>
+                <div class="stats-number">{{ productos|length }}</div>
+                <div class="stats-label">Productos en inventario</div>
+                <a href="{% url 'product' %}" class="btn btn-primary mt-3 w-100">Gestionar Productos</a>
+            </div>
+        </div>
+        <!-- Clientes -->
+        <div class="col-md-4 col-lg-3">
+            <div class="dashboard-card">
+                <div class="card-icon text-success">
+                    <i class="bi bi-people"></i>
+                </div>
+                <h3>Clientes</h3>
+                <div class="stats-number">{{ clientes|length }}</div>
+                <div class="stats-label">Clientes registrados</div>
+                <a href="{% url 'customer' %}" class="btn btn-success mt-3 w-100">Gestionar Clientes</a>
+            </div>
+        </div>
+        <!-- Ventas -->
+        <div class="col-md-4 col-lg-3">
+            <div class="dashboard-card">
+                <div class="card-icon text-warning">
+                    <i class="bi bi-cart"></i>
+                </div>
+                <h3>Ventas</h3>
+                <div class="stats-number">{{ ventas|length }}</div>
+                <div class="stats-label">Ventas del mes</div>
+                <a href="{% url 'sale' %}" class="btn btn-warning mt-3 w-100">Gestionar Ventas</a>
+            </div>
+        </div>
+        <!-- Proveedores -->
+        <div class="col-md-4 col-lg-3">
+            <div class="dashboard-card">
+                <div class="card-icon text-info">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h3>Proveedores</h3>
+                <div class="stats-number">{{ proveedores|length }}</div>
+                <div class="stats-label">Proveedores activos</div>
+                <a href="{% url 'supplier' %}" class="btn btn-info mt-3 w-100">Gestionar Proveedores</a>
+            </div>
+        </div>
+        <!-- Empleados -->
+        <div class="col-md-4 col-lg-3">
+            <div class="dashboard-card">
+                <div class="card-icon text-dark">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <h3>Empleados</h3>
+                <div class="stats-number">{{ empleados|length }}</div>
+                <div class="stats-label">Empleados activos</div>
+                <a href="{% url 'employee' %}" class="btn btn-dark mt-3 w-100">Gestionar Empleados</a>
+            </div>
+        </div>
+        <!-- Inventario -->
+        <div class="col-md-4 col-lg-3">
+            <div class="dashboard-card">
+                <div class="card-icon text-danger">
+                    <i class="bi bi-clipboard-data"></i>
+                </div>
+                <h3>Inventario</h3>
+                <div class="stats-number">{{ cantInventory }}</div>
+                <div class="stats-label">Unidades en stock</div>
+                <a href="#" class="btn btn-danger mt-3 w-100">Gestionar Inventario</a>
+            </div>
+        </div>
+        <div class="col-md-4 col-lg-3">
+            <div class="dashboard-card">
+                <div class="card-icon text-success">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+                <h3>Gastos</h3>
+                <div class="stats-number">{{ gastos|length }}</div>
+                <div class="stats-label">Gastos</div>
+                <a href="{% url 'expenses' %}" class="btn btn-gasto mt-3 w-100">Gestionar Gastos</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

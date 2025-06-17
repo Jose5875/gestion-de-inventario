@@ -1,0 +1,153 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 class="product-title">Gestión de Empleados</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div></div>
+        <button id="toggleFormBtn" class="add-product-btn" type="button">
+            <i class="bi bi-plus-circle"></i> Agregar Empleado
+        </button>
+    </div>
+    <!-- Formulario oculto/visible -->
+    <div id="employeeFormContainer" style="display: none;">
+        <div class="product-card p-4 mb-4">
+            <h3 class="mb-3" style="color:#c471f5;"><i class="bi bi-person-plus"></i> Registrar Nuevo Empleado</h3>
+            <form method="post" action="">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-person"></i> Nombre</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-envelope"></i> Correo</label>
+                        {{ form.gmail }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-telephone"></i> Teléfono</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-briefcase"></i> Cargo</label>
+                        {{ form.post }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success w-100"><i class="bi bi-check-circle"></i> Registrar Empleado</button>
+            </form>
+        </div>
+    </div>
+    <!-- Lista de empleados -->
+    <div class="product-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="product-list-title" id="titleEmployee">
+                <i class="bi bi-people"></i> Listado de Empleados <span id="cantidadEmpleados">{% if employees %}({{ employees|length }}){% else %}(0){% endif %}</span>
+            </div>
+            <form class="d-flex product-search-form">
+                <input type="text" id="inputBuscar" class="product-search-input" placeholder="Buscar empleados...">
+            </form>
+        </div>
+        {% if employees %}
+        <div class="responsive-table">
+            <table class="table table-dark table-hover align-middle rounded-3 overflow-hidden mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Cargo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td>{{ employee.id }}</td>
+                        <td class="employee-name">{{ employee.name }}</td>
+                        <td>{{ employee.gmail }}</td>
+                        <td>{{ employee.phone }}</td>
+                        <td>{{ employee.post }}</td>
+                        <td>
+                            <a href="{% url 'editar_empleado' employee.id %}" class="btn btn-success btn-sm btn-editar"><i class="bi bi-pencil"></i> Editar</a>
+                            <a href="{% url 'eliminar_empleado' employee.id %}" class="btn btn-danger btn-sm btn-eliminar" onclick="return confirm('¿Está seguro que desea eliminar este empleado?')"><i class="bi bi-trash"></i> Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 product-empty-msg">
+            Aún no hay empleados registrados. ¡Agrega el primero!
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    const toggleBtn = document.getElementById('toggleFormBtn');
+    const formContainer = document.getElementById('employeeFormContainer');
+    toggleBtn.addEventListener('click', function () {
+        if (formContainer.style.display === 'none') {
+            formContainer.style.display = 'block';
+            toggleBtn.innerHTML = '<i class="bi bi-dash-circle"></i> Ocultar Formulario';
+        } else {
+            formContainer.style.display = 'none';
+            toggleBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Empleado';
+        }
+    });
+
+    const inputBuscar = document.getElementById('inputBuscar');
+    const tablaEmpleados = document.querySelector('table tbody');
+    const cantidadEmpleados = document.getElementById('cantidadEmpleados');
+    const totalEmpleados = tablaEmpleados ? tablaEmpleados.querySelectorAll('tr').length : 0;
+
+    // Establecer el contador inicial
+    cantidadEmpleados.textContent = `(${totalEmpleados})`;
+
+    inputBuscar.addEventListener('input', function () {
+        const textoBusqueda = this.value.toLowerCase().trim();
+        const filas = tablaEmpleados.querySelectorAll('tr');
+        let cantidad = 0;
+        
+        if (textoBusqueda === '') {
+            cantidad = totalEmpleados;
+            filas.forEach(fila => fila.style.display = '');
+        } else {
+            filas.forEach(fila => {
+                const nombreCelda = fila.querySelector('.employee-name');
+                const textoNombre = nombreCelda ? nombreCelda.textContent.toLowerCase().trim() : '';
+                
+                if (textoNombre.includes(textoBusqueda)) {
+                    fila.style.display = '';
+                    cantidad++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+        
+        cantidadEmpleados.textContent = `(${cantidad})`;
+    });
+
+    // Agregar event listeners para los botones de editar y eliminar
+    document.querySelectorAll('.btn-editar').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = this.getAttribute('href');
+        });
+    });
+
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('¿Está seguro que desea eliminar este empleado?')) {
+                window.location.href = this.getAttribute('href');
+            }
+        });
+    });
+</script>
+{% endblock %} 

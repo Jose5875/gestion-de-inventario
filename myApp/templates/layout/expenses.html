@@ -1,0 +1,72 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 class="product-title">Gestión de Gastos</h1>
+    <div class="product-card p-4 mb-4">
+        <h3 class="mb-3" style="color:#c471f5;"><i class="bi bi-cash-coin"></i> Registrar Nuevo Gasto</h3>
+        <form method="post" action="">
+            {% csrf_token %}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Monto</label>
+                    {{ form.amount }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Descripción</label>
+                    {{ form.description }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-gradient w-100"><i class="bi bi-plus-circle"></i> Registrar Gasto</button>
+        </form>
+    </div>
+    <div class="product-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="product-list-title" id="titleExpenses">
+                <i class="bi bi-cash-coin"></i> Listado de Gastos <span id="cantidadGastos">({{ gastos|length }})</span>
+            </div>
+        </div>
+        {% if gastos %}
+        <div class="responsive-table">
+            <table class="table table-dark table-hover align-middle rounded-3 overflow-hidden mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Monto</th>
+                        <th>Descripción</th>
+                        <th>Fecha</th>
+                        <th>Responsable</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for gasto in gastos %}
+                    <tr>
+                        <td>{{ gasto.id }}</td>
+                        <td>${{ gasto.amount }}</td>
+                        <td>{{ gasto.description }}</td>
+                        <td>{{ gasto.date|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if gasto.responsible %}
+                                {{ gasto.responsible.username }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'edit_expense' gasto.id %}" class="btn btn-success btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+                            <a href="{% url 'delete_expense' gasto.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro que desea eliminar este gasto?');"><i class="bi bi-trash"></i> Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 product-empty-msg">
+            No hay gastos registrados.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

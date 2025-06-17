@@ -1,0 +1,260 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 class="product-title">Gestión de Ventas</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div></div>
+        <button id="toggleFormBtn" class="add-product-btn" type="button">
+            <i class="bi bi-plus-circle"></i> Nueva Venta
+        </button>
+    </div>
+    <!-- Formulario oculto/visible -->
+    <div id="saleFormContainer" style="display: none;">
+        <div class="product-card p-4 mb-4">
+            <h3 class="mb-3" style="color:#c471f5;"><i class="bi bi-cart-plus"></i> Registrar Nueva Venta</h3>
+            <form method="post" action="" id="saleForm">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-person"></i> Cliente</label>
+                        {{ sale_form.customer }}
+                    </div>
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-person-badge"></i> Empleado</label>
+                        {{ sale_form.employee }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <h4 class="mb-3">Detalles de la Venta</h4>
+                    <div id="saleDetails">
+                        <template id="saleDetailTemplate">
+                            <div class="row mb-3 sale-detail" data-detail-id="">
+                            <div class="col">
+                                <label class="form-label">Producto</label>
+                                <select name="producto" class="form-control">
+                                        <option value="">Selecciona un producto </option>
+                                    {% for product in products %}
+                                        <option value="{{ product.id }}" data-precio="{{ product.price }}">{{ product.name }} - ${{ product.price }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Cantidad</label>
+                                <input type="number" name="amount" class="form-control" min="1" value="1">
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Precio Unitario</label>
+                                <input type="number" name="unit_price" class="form-control" step="0.01" readonly>
+                            </div>
+                            <div class="col-auto d-flex align-items-end">
+                                    <button type="button" class="btn btn-danger remove-detail" data-detail-id=""><i class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                        </template>
+                        <!-- Primer detalle visible por defecto -->
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="addDetail">
+                        <i class="bi bi-plus-circle"></i> Agregar Producto
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <h4>Total: $<span id="totalAmount">0.00</span></h4>
+                </div>
+                <button type="submit" class="btn btn-success w-100"><i class="bi bi-check-circle"></i> Registrar Venta</button>
+            </form>
+        </div>
+    </div>
+    <!-- Lista de ventas -->
+    <div class="product-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="product-list-title" id="titleSale">
+                <i class="bi bi-cart"></i> Historial de Ventas <span id="cantidadVentas">{% if sales %}({{ sales|length }}){% else %}(0){% endif %}</span>
+            </div>
+            <form class="d-flex product-search-form">
+                <input type="text" id="inputBuscar" class="product-search-input" placeholder="Buscar ventas...">
+            </form>
+        </div>
+        {% if sales %}
+        <div class="responsive-table">
+            <table class="table table-dark table-hover align-middle rounded-3 overflow-hidden mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Empleado</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td>{{ sale.id }}</td>
+                        <td>{{ sale.date|date:"d/m/Y H:i" }}</td>
+                        <td>{{ sale.customer.name }}</td>
+                        <td>{{ sale.employee.name }}</td>
+                        <td>${{ sale.get_total|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'ver_venta' sale.id %}" class="btn btn-info btn-sm"><i class="bi bi-eye"></i> Ver</a>
+                            <a href="{% url 'eliminar_venta' sale.id %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 product-empty-msg">
+            Aún no hay ventas registradas. ¡Registra la primera!
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Toggle formulario
+    const toggleBtn = document.getElementById('toggleFormBtn');
+    const formContainer = document.getElementById('saleFormContainer');
+    toggleBtn.addEventListener('click', function () {
+        if (formContainer.style.display === 'none') {
+            formContainer.style.display = 'block';
+            toggleBtn.innerHTML = '<i class="bi bi-dash-circle"></i> Ocultar Formulario';
+        } else {
+            formContainer.style.display = 'none';
+            toggleBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Nueva Venta';
+        }
+    });
+
+    // Agregar detalle de venta
+    const addDetailBtn = document.getElementById('addDetail');
+    const saleDetails = document.getElementById('saleDetails');
+    
+    let detailCounter = 0;
+
+    function addInitialDetail() {
+        const template = document.getElementById('saleDetailTemplate');
+        const saleDetails = document.getElementById('saleDetails');
+        const clone = template.content.firstElementChild.cloneNode(true);
+        const detailId = `detail-${detailCounter++}`;
+        clone.setAttribute('data-detail-id', detailId);
+        clone.querySelector('.remove-detail').setAttribute('data-detail-id', detailId);
+        saleDetails.appendChild(clone);
+    }
+    
+    addDetailBtn.addEventListener('click', function() {
+        const template = document.getElementById('saleDetailTemplate');
+        const clone = template.content.firstElementChild.cloneNode(true);
+        const detailId = `detail-${detailCounter++}`;
+        clone.setAttribute('data-detail-id', detailId);
+        clone.querySelector('.remove-detail').setAttribute('data-detail-id', detailId);
+        
+        // Limpiar los valores de los campos en el nuevo detalle
+        clone.querySelectorAll('input').forEach(input => {
+            if (input.type === 'number') input.value = input.name === 'amount' ? 1 : '';
+        });
+        clone.querySelector('select[name="producto"]').selectedIndex = 0;
+        saleDetails.appendChild(clone);
+        updateRemoveButtons();
+        updateTotal();
+    });
+
+    // Eliminar detalle de venta
+    saleDetails.addEventListener('click', function(e) {
+        const btn = e.target.closest('.remove-detail');
+        if (btn) {
+            const detailId = btn.getAttribute('data-detail-id');
+            const detail = document.querySelector(`.sale-detail[data-detail-id="${detailId}"]`);
+            if (detail && saleDetails.querySelectorAll('.sale-detail').length > 1) {
+                console.log("Eliminando detalle con ID:", detailId);
+                detail.remove();
+                updateRemoveButtons();
+                updateTotal();
+            }
+        }
+    });
+
+    // Actualizar precio unitario y total
+    saleDetails.addEventListener('change', function(e) {
+        if (e.target.name === 'producto') {
+            const option = e.target.options[e.target.selectedIndex];
+            const price = option.getAttribute('data-precio');
+            const detail = e.target.closest('.sale-detail');
+            detail.querySelector('[name="unit_price"]').value = price;
+            updateTotal();
+        } else if (e.target.name === 'amount') {
+            updateTotal();
+        }
+    });
+
+    function updateTotal() {
+        let total = 0;
+        document.querySelectorAll('.sale-detail').forEach(detail => {
+            const amount = parseFloat(detail.querySelector('[name="amount"]').value) || 0;
+            const price = parseFloat(detail.querySelector('[name="unit_price"]').value) || 0;
+            total += amount * price;
+        });
+        document.getElementById('totalAmount').textContent = total.toFixed(2);
+    }
+
+    function updateRemoveButtons() {
+        const details = saleDetails.querySelectorAll('.sale-detail');
+        details.forEach((detail, idx) => {
+            const removeBtn = detail.querySelector('.remove-detail');
+            if (removeBtn) {
+                removeBtn.style.display = (idx === 0) ? 'none' : '';
+            }
+        });
+    }
+
+    // Búsqueda de ventas
+    const inputBuscar = document.getElementById('inputBuscar');
+    const tablaVentas = document.querySelector('table tbody');
+    const cantidadVentas = document.getElementById('cantidadVentas');
+    const totalVentas = tablaVentas ? tablaVentas.querySelectorAll('tr').length : 0;
+
+    // Establecer el contador inicial
+    cantidadVentas.textContent = `(${totalVentas})`;
+
+    inputBuscar.addEventListener('input', function () {
+        const textoBusqueda = this.value.toLowerCase().trim();
+        const filas = tablaVentas.querySelectorAll('tr');
+        let cantidad = 0;
+        
+        if (textoBusqueda === '') {
+            cantidad = totalVentas;
+            filas.forEach(fila => fila.style.display = '');
+        } else {
+            filas.forEach(fila => {
+                const textoFila = fila.textContent.toLowerCase();
+                if (textoFila.includes(textoBusqueda)) {
+                    fila.style.display = '';
+                    cantidad++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+        
+        cantidadVentas.textContent = `(${cantidad})`;
+    });
+
+    document.querySelectorAll('.sale-detail').forEach(detail => {
+        const select = detail.querySelector('select[name="producto"]');
+        const inputPrecio = detail.querySelector('input[name="unit_price"]');
+        if (select && inputPrecio) {
+            const selectedOption = select.options[select.selectedIndex];
+            const precio = selectedOption.getAttribute('data-precio');
+            if (precio) inputPrecio.value = precio;
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateRemoveButtons();
+    });
+
+    // Inicializar el primer detalle al cargar la página
+    addInitialDetail();
+</script>
+{% endblock %} 

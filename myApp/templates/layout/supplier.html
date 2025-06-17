@@ -1,0 +1,159 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 class="product-title">Gestión de Proveedores</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div></div>
+        <button id="toggleFormBtn" class="add-product-btn" type="button">
+            <i class="bi bi-plus-circle"></i> Agregar Proveedor
+        </button>
+    </div>
+    <!-- Formulario oculto/visible -->
+    <div id="supplierFormContainer" style="display: none;">
+        <div class="product-card p-4 mb-4">
+            <h3 class="mb-3" style="color:#c471f5;"><i class="bi bi-building-add"></i> Registrar Nuevo Proveedor</h3>
+            <form method="post" action="">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-person"></i> Nombre del Proveedor</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-building"></i> Empresa</label>
+                        {{ form.company }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-envelope"></i> Correo</label>
+                        {{ form.gmail }}
+                    </div>
+                    <div class="col">
+                        <label class="form-label"><i class="bi bi-telephone"></i> Teléfono</label>
+                        {{ form.phone }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-geo-alt"></i> Dirección</label>
+                    {{ form.address }}
+                </div>
+                <button type="submit" class="btn btn-success w-100"><i class="bi bi-check-circle"></i> Registrar Proveedor</button>
+            </form>
+        </div>
+    </div>
+    <!-- Lista de proveedores -->
+    <div class="product-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="product-list-title" id="titleSupplier">
+                <i class="bi bi-building"></i> Listado de Proveedores <span id="cantidadProveedores">{% if suppliers %}({{ suppliers|length }}){% else %}(0){% endif %}</span>
+            </div>
+            <form class="d-flex product-search-form">
+                <input type="text" id="inputBuscar" class="product-search-input" placeholder="Buscar proveedores...">
+            </form>
+        </div>
+        {% if suppliers %}
+        <div class="responsive-table">
+            <table class="table table-dark table-hover align-middle rounded-3 overflow-hidden mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Empresa</th>
+                        <th>Correo</th>
+                        <th>Teléfono</th>
+                        <th>Dirección</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for supplier in suppliers %}
+                    <tr>
+                        <td>{{ supplier.id }}</td>
+                        <td class="supplier-name">{{ supplier.name }}</td>
+                        <td>{{ supplier.company }}</td>
+                        <td>{{ supplier.gmail }}</td>
+                        <td>{{ supplier.phone }}</td>
+                        <td>{{ supplier.address }}</td>
+                        <td>
+                            <a href="{% url 'editar_proveedor' supplier.id %}" class="btn btn-success btn-sm btn-editar"><i class="bi bi-pencil"></i> Editar</a>
+                            <a href="{% url 'eliminar_proveedor' supplier.id %}" class="btn btn-danger btn-sm btn-eliminar" onclick="return confirm('¿Está seguro que desea eliminar este proveedor?')"><i class="bi bi-trash"></i> Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 product-empty-msg">
+            Aún no hay proveedores registrados. ¡Agrega el primero!
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    const toggleBtn = document.getElementById('toggleFormBtn');
+    const formContainer = document.getElementById('supplierFormContainer');
+    toggleBtn.addEventListener('click', function () {
+        if (formContainer.style.display === 'none') {
+            formContainer.style.display = 'block';
+            toggleBtn.innerHTML = '<i class="bi bi-dash-circle"></i> Ocultar Formulario';
+        } else {
+            formContainer.style.display = 'none';
+            toggleBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Proveedor';
+        }
+    });
+
+    const inputBuscar = document.getElementById('inputBuscar');
+    const tablaProveedores = document.querySelector('table tbody');
+    const cantidadProveedores = document.getElementById('cantidadProveedores');
+    const totalProveedores = tablaProveedores ? tablaProveedores.querySelectorAll('tr').length : 0;
+
+    // Establecer el contador inicial
+    cantidadProveedores.textContent = `(${totalProveedores})`;
+
+    inputBuscar.addEventListener('input', function () {
+        const textoBusqueda = this.value.toLowerCase().trim();
+        const filas = tablaProveedores.querySelectorAll('tr');
+        let cantidad = 0;
+        
+        if (textoBusqueda === '') {
+            cantidad = totalProveedores;
+            filas.forEach(fila => fila.style.display = '');
+        } else {
+            filas.forEach(fila => {
+                const nombreCelda = fila.querySelector('.supplier-name');
+                const textoNombre = nombreCelda ? nombreCelda.textContent.toLowerCase().trim() : '';
+                
+                if (textoNombre.includes(textoBusqueda)) {
+                    fila.style.display = '';
+                    cantidad++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+        
+        cantidadProveedores.textContent = `(${cantidad})`;
+    });
+
+    // Agregar event listeners para los botones de editar y eliminar
+    document.querySelectorAll('.btn-editar').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = this.getAttribute('href');
+        });
+    });
+
+    document.querySelectorAll('.btn-eliminar').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('¿Está seguro que desea eliminar este proveedor?')) {
+                window.location.href = this.getAttribute('href');
+            }
+        });
+    });
+</script>
+{% endblock %} 

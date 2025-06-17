@@ -1,0 +1,118 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 class="product-title"><i class="bi bi-bar-chart"></i> Reportes</h1>
+    <div class="row">
+        <div class="col-md-6 col-lg-4">
+            <div class="product-card p-4 mb-4">
+                <h4 class="mb-2" style="color:#c471f5;"><i class="bi bi-cart"></i> Ventas</h4>
+                <div class="mb-2">Total de ventas: <b>{{ total_ventas }}</b></div>
+                <div class="mb-2">Monto total vendido: <b>${{ total_monto_ventas }}</b></div>
+                <div class="mb-2">Ventas por mes:</div>
+                <ul class="profile-secondary mb-0">
+                    {% for v in ventas_por_mes %}
+                        <li>Mes {{ v.mes }}: {{ v.total }}
+                            <a href="{% url 'exportar_ventas_mes_excel' v.mes %}" class="btn btn-outline-success btn-sm ms-2"><i class="bi bi-file-earmark-excel"></i> Descargar</a>
+                        </li>
+                    {% empty %}
+                        <li>No hay ventas registradas.</li>
+                    {% endfor %}
+                </ul>
+                <canvas id="ventasChart" height="180"></canvas>
+                <a href="{% url 'exportar_ventas_excel' %}" class="btn btn-success w-100 mt-3"><i class="bi bi-file-earmark-excel"></i> Exportar todo a Excel</a>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="product-card p-4 mb-4">
+                <h4 class="mb-2" style="color:#c471f5;"><i class="bi bi-box-seam"></i> Productos</h4>
+                <div class="mb-2">Total de productos: <b>{{ total_productos }}</b></div>
+                <div class="mb-2">Productos con bajo stock (&lt;10): <b>{{ productos_bajo_stock }}</b></div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="product-card p-4 mb-4">
+                <h4 class="mb-2" style="color:#c471f5;"><i class="bi bi-cash-coin"></i> Gastos</h4>
+                <div class="mb-2">Total de gastos: <b>{{ total_gastos }}</b></div>
+                <div class="mb-2">Monto total gastado: <b>${{ total_monto_gastos }}</b></div>
+                <div class="mb-2">Gastos por mes:</div>
+                <ul class="profile-secondary mb-0">
+                    {% for g in gastos_por_mes %}
+                        <li>Mes {{ g.mes }}: ${{ g.total }}
+                            <a href="{% url 'exportar_gastos_mes_excel' g.mes %}" class="btn btn-outline-success btn-sm ms-2"><i class="bi bi-file-earmark-excel"></i> Descargar</a>
+                        </li>
+                    {% empty %}
+                        <li>No hay gastos registrados.</li>
+                    {% endfor %}
+                </ul>
+                <canvas id="gastosChart" height="180"></canvas>
+                <a href="{% url 'exportar_gastos_excel' %}" class="btn btn-success w-100 mt-3"><i class="bi bi-file-earmark-excel"></i> Exportar todo a Excel</a>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="product-card p-4 mb-4">
+                <h4 class="mb-2" style="color:#c471f5;"><i class="bi bi-clipboard-data"></i> Inventario</h4>
+                <div class="mb-2">Unidades totales en stock: <b>{{ total_inventario }}</b></div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Ventas por mes
+    const ventasLabels = [{% for v in ventas_por_mes %}'{{ v.mes }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const ventasData = [{% for v in ventas_por_mes %}{{ v.total }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    if (document.getElementById('ventasChart')) {
+        new Chart(document.getElementById('ventasChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ventasLabels,
+                datasets: [{
+                    label: 'Ventas por mes',
+                    data: ventasData,
+                    backgroundColor: 'rgba(209, 111, 255, 0.7)',
+                    borderColor: '#c471f5',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: '#232C43' }, ticks: { color: '#fff' } },
+                    y: { grid: { color: '#232C43' }, ticks: { color: '#fff' }, beginAtZero: true }
+                }
+            }
+        });
+    }
+    // Gastos por mes
+    const gastosLabels = [{% for g in gastos_por_mes %}'{{ g.mes }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const gastosData = [{% for g in gastos_por_mes %}{{ g.total }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    if (document.getElementById('gastosChart')) {
+        new Chart(document.getElementById('gastosChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: gastosLabels,
+                datasets: [{
+                    label: 'Gastos por mes',
+                    data: gastosData,
+                    backgroundColor: 'rgba(255, 106, 159, 0.7)',
+                    borderColor: '#ff6a9f',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: '#232C43' }, ticks: { color: '#fff' } },
+                    y: { grid: { color: '#232C43' }, ticks: { color: '#fff' }, beginAtZero: true }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %} 

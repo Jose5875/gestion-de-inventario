@@ -1,0 +1,37 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h1 class="product-title">Editar Empleado</h1>
+    <div class="product-card p-4 mb-4">
+        <h3 class="mb-3" style="color:#c471f5;"><i class="bi bi-pencil"></i> Editar Empleado: {{ empleado.name }}</h3>
+        <form method="post" action="">
+            {% csrf_token %}
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="form-label"><i class="bi bi-person"></i> Nombre</label>
+                    {{ form.name }}
+                </div>
+                <div class="col">
+                    <label class="form-label"><i class="bi bi-envelope"></i> Correo</label>
+                    {{ form.gmail }}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col">
+                    <label class="form-label"><i class="bi bi-telephone"></i> Teléfono</label>
+                    {{ form.phone }}
+                </div>
+                <div class="col">
+                    <label class="form-label"><i class="bi bi-briefcase"></i> Cargo</label>
+                    {{ form.post }}
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success flex-grow-1"><i class="bi bi-check-circle"></i> Guardar Cambios</button>
+                <a href="{% url 'employee' %}" class="btn btn-secondary flex-grow-1"><i class="bi bi-x-circle"></i> Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 
