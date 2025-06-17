@@ -1,3 +1,6 @@
+
+
+
 Integrantes del grupo
 1 . Kenner Palma
 2 . Jose Antonio Pinto
